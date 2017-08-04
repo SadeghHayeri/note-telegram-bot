@@ -14,16 +14,23 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 
+"""
+states:
+    get_name <- get name for new note
+"""
+
 from YamJam import yamjam
 CFG = yamjam()['sharenote']
 
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 from commands import Commands
+from customfilters import ScenarioFilter
 
 def main():
 
     # Create new command instance
     commands = Commands()
+    scenarios = commands.getSenarios()
 
     # Create the EventHandler and pass it your bot's token.
     updater = Updater(CFG['telegram']['token'])
@@ -32,13 +39,16 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", commands.start))
+    dp.add_handler(CommandHandler("start", commands.main_menu))
     dp.add_handler(CommandHandler("help", commands.help))
 
-    dp.add_handler(CallbackQueryHandler(commands.button))
-
     # on noncommand i.e message - echo the message on Telegram
+
+    dp.add_handler(MessageHandler(Filters.text & ScenarioFilter(scenarios), scenarios.handler))
     dp.add_handler(MessageHandler(Filters.text, commands.echo))
+
+    # button clicks
+    dp.add_handler(CallbackQueryHandler(commands.button_handler))
 
     # log all errors
     dp.add_error_handler(commands.error)
