@@ -1,7 +1,7 @@
 """baseline
 
 Revision ID: 07c979a972e1
-Revises: 
+Revises:
 Create Date: 2017-07-28 23:14:40.131158
 
 """
@@ -22,4 +22,4 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_table('bug')
+    pass
