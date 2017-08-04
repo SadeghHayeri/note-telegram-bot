@@ -17,39 +17,14 @@ bot.
 from YamJam import yamjam
 CFG = yamjam()['sharenote']
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-import logging
-
-# Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
-
-
-# Define a few command handlers. These usually take the two arguments bot and
-# update. Error handlers also receive the raised TelegramError object in error.
-def start(bot, update):
-    update.message.reply_text('Hi!')
-
-
-def help(bot, update):
-    update.message.reply_text('Help!')
-
-
-def echo(bot, update):
-    update.message.reply_text(update.message.text)
-
-def sex(bot, update):
-    print(update)
-    bot.send_message(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!")
-
-
-def error(bot, update, error):
-    logger.warn('Update "%s" caused error "%s"' % (update, error))
-
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters
+from commands import Commands
 
 def main():
+
+    # Create new command instance
+    commands = Commands()
+
     # Create the EventHandler and pass it your bot's token.
     updater = Updater(CFG['telegram']['token'])
 
@@ -57,15 +32,16 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("start", commands.start))
+    dp.add_handler(CommandHandler("help", commands.help))
 
+    dp.add_handler(CallbackQueryHandler(commands.button))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text, echo))
+    dp.add_handler(MessageHandler(Filters.text, commands.echo))
 
     # log all errors
-    dp.add_error_handler(error)
+    dp.add_error_handler(commands.error)
 
     # Start the Bot
     updater.start_polling()
